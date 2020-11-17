@@ -51,8 +51,8 @@ func takings() {
 	fmt.Println(s)
 }
 
-func cstsByCat() {
-	var d CostData
+func costsByCat() {
+
 	var c CostByCat
 	var e []CostByCat
 
@@ -66,12 +66,15 @@ func cstsByCat() {
 	categories := GetCategories()
 
 	for cat, _ := range categories {
-		db.Table("costs").Select("sum(debit) as a").Where("category = ?", cat).Where("date >= ? AND date <= ?", dateFrom, dateTo).Scan(&c)
+		db.Table("costs").Select("sum(debit) as a").
+			Where("category = ?", cat).
+			Where("date >= ? AND date <= ?", dateFrom, dateTo).
+			Scan(&c)
 
 		e = append(e, CostByCat{cat, c.A, 10, 10})
 	}
 
-	fmt.Println(d)
+	fmt.Println(e)
 
 }
 
@@ -335,5 +338,6 @@ func GetCategories() (c map[string][]string) {
 }
 
 func main() {
-	cstsByCat()
+	costsByCat()
+	// takings()
 }
