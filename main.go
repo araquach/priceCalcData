@@ -4,7 +4,19 @@ import (
 	"fmt"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
+	"time"
 )
+
+type Cost struct {
+	ID          uint      `json:"id" gorm:"primary_key"`
+	Date        time.Time `json:"date" gorm:"type:date"`
+	Type        string    `json:"type"`
+	Account     string    `json:"account"`
+	Description string    `json:"description"`
+	Debit       float64   `json:"debit"`
+	Balance     float64   `json:"balance"`
+	Category    string    `json:"category"`
+}
 
 type CostByCat struct {
 	C string `json:"category"`
@@ -49,6 +61,39 @@ func takings() {
 	s.A = s.T / 3
 
 	fmt.Println(s)
+}
+
+func sum() {
+	var result float64
+
+	db := dbConn()
+	db.LogMode(true)
+	defer db.Close()
+
+	row := db.Table("costs").
+		Where("category = ?", "Stock").
+		Select("sum(debit)").
+		Row()
+	row.Scan(&result)
+	fmt.Println(result)
+}
+
+func sum2() {
+	var result float64
+
+	db := dbConn()
+	db.LogMode(true)
+	defer db.Close()
+
+	rows, err := db.Model(&Cost{}).Rows()
+	defer rows.Close()
+	if err != nil {
+		panic(err)
+	}
+	for rows.Next() {
+		db.ScanRows(rows, &result)
+		fmt.Println(result)
+	}
 }
 
 func costsByCat() {
@@ -340,4 +385,5 @@ func GetCategories() (c map[string][]string) {
 func main() {
 	costsByCat()
 	// takings()
+	sum2()
 }
